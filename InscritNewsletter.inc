@@ -3,7 +3,7 @@
 class InscritNewsletter extends MyObject {
   protected static $db_table_name = 'newsletter_registration';
   protected static $db_table_identifier = 'snr';
-  protected static $default_data = array('status'=>1);
+  protected static $default_data = array('status'=>1,'user'=>0);
   public $snr;
 
   public $email;
@@ -11,7 +11,6 @@ class InscritNewsletter extends MyObject {
   public $status;
   public $created;
   public $updated;
-  public $data;
 
 
   public static function checkIfInscrit($email) {

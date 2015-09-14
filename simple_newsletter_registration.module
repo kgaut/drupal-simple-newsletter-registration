@@ -10,23 +10,9 @@
  */
 function simple_newsletter_registration_menu() {
   $items = array();
-  $items['newsletter'] = array(
-    'title' => t('Inscription à la newsletter'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('_simple_newsletter_registration_form'),
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-  );
-  $items['newsletter/%'] = array(
-      'title' => t('Inscription à la newsletter'),
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('_simple_newsletter_registration_form',1),
-      'access arguments' => array('access content'),
-      'type' => MENU_CALLBACK,
-  );
-  $items['admin/simple_newsletter_registration'] = array(
+  $items['admin/config/system/simple_newsletter_registration'] = array(
     'title' => 'Newsletter',
-    'description' => 'Gestion de la newsletter',
+    'description' => t('Newsletter management'),
     'menu_name' => 'management',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_simple_newsletter_registration_listing_form'),
@@ -34,7 +20,7 @@ function simple_newsletter_registration_menu() {
     'file' => 'simple_newsletter_registration.admin.php',
     'type' => MENU_NORMAL_ITEM,
   );
-  $items['admin/simple_newsletter_registration/list'] = array(
+  $items['admin/config/system/simple_newsletter_registration/list'] = array(
     'title' => 'Liste des inscrits',
     'access arguments' => array('list silhouette newsletter'),
     'file' => 'simple_newsletter_registration.admin.php',
@@ -43,7 +29,7 @@ function simple_newsletter_registration_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 1
   );
-  $items['admin/simple_newsletter_registration/config'] = array(
+  $items['admin/config/system/simple_newsletter_registration/config'] = array(
     'title' => 'Configuration Newsletter Silhouette',
     'description' => 'Gestion de la configuration de la newsletter Silhouette',
     'page callback' => 'drupal_get_form',
@@ -54,7 +40,7 @@ function simple_newsletter_registration_menu() {
     'weight' => 2
   );
 
-  $items['admin/simple_newsletter_registration/%/edit'] = array(
+  /*$items['admin/config/system/simple_newsletter_registration/%/edit'] = array(
       'title' => 'Liste des inscrits',
       'access arguments' => array('edit silhouette newsletter'),
       'file' => 'simple_newsletter_registration.admin.php',
@@ -63,7 +49,7 @@ function simple_newsletter_registration_menu() {
       'type' => MENU_CALLBACK,
       'weight' => 1
   );
-  $items['admin/simple_newsletter_registration/%/delete'] = array(
+  $items['admin/config/system/simple_newsletter_registration/%/delete'] = array(
       'title' => 'Liste des inscrits',
       'access arguments' => array('edit silhouette newsletter'),
       'file' => 'simple_newsletter_registration.admin.php',
@@ -71,7 +57,7 @@ function simple_newsletter_registration_menu() {
       'page arguments' => array(2),
       'type' => MENU_CALLBACK,
       'weight' => 1
-  );
+  );*/
   return $items;
 }
 
@@ -113,7 +99,7 @@ function simple_newsletter_registration_block_view($delta = '') {
 
   switch ($delta) {
     case 'inscription-newsletter':
-      $block['subject'] = t('Newsletter');
+      $block['subject'] = t(variable_get('snr_block_title','Newsletter'));
       $block['content'] = drupal_get_form('_simple_newsletter_registration_block_form');
       break;
   }
@@ -121,19 +107,15 @@ function simple_newsletter_registration_block_view($delta = '') {
 }
 
 function _simple_newsletter_registration_block_form($form,&$form_state) {
-	$form['contenu'] = array(
-		'#type' => 'markup',
-		'#markup' => '<p>' . t('Inscrivez-vous et restez informé de tous nos évènements, actualités et nouveautés par email') . '</p>',
-	);
   $form['email'] = array(
     '#type' => 'textfield',
     '#attributes' => array(
-      'placeholder' => t('Votre email')
+      'placeholder' => t('email address')
     )
   );
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('ok'),
+    '#value' => t('Subscribe'),
     '#attributes' => array(
 			'class' => array('button')
 		),
@@ -144,16 +126,20 @@ function _simple_newsletter_registration_block_form($form,&$form_state) {
 function _simple_newsletter_registration_block_form_submit($form,&$form_state) {
   $email = isset($form_state['values']['email']) ? $form_state['values']['email'] : null;
 
-  if(filter_var($email,FILTER_VALIDATE_EMAIL)) {
+  if(!filter_var($email,FILTER_VALIDATE_EMAIL)) {
     form_set_error('email',t('The address is not valid'));
+    return false;
   }
   if(InscritNewsletter::checkIfInscrit($email) && !isset($form_state['values']['snr'])) {
     form_set_error('email',t('You are already subscribe to our newsletter'));
+
+    return false;
   }
   $data = array();
   $val = $form_state['values'];
   foreach ($val as $key=>$value) {$data[$key] = $value;}
   $inscrit = new InscritNewsletter($data);
   $inscrit->save();
-  drupal_goto('admin/simple_newsletter_registration');
+  $nid = variable_get('snr_landing_page');
+  drupal_goto('node/'.$nid);
 }
