@@ -1,0 +1,7 @@
+name = Simple Newsletter Registration
+description = Provide a little form to register to a newsletter
+#dependencies[] =
+package = Misc
+core = 7.x
+files[] = InscritNewsletter.inc
+files[] = simple_newsletter_registration.admin.php

@@ -1,0 +1,44 @@
+<?php
+
+function simple_newsletter_registration_schema() {
+  $schema = array();
+  $schema['newsletter_registration'] = array(
+    'fields' => array(
+      'snr' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'email' => array(
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'length'  => '255',
+      ),
+      'status' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => 1,
+        'not null' => TRUE,
+      ),
+      'user' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => 0,
+        'not null' => TRUE,
+      ),
+      'created' => array(
+        'type' => 'int',
+        'default' => null,
+      ),
+      'updated' => array(
+        'type' => 'int',
+        'default' => null,
+      ),
+    ),
+    'primary key' => array('snr'),
+    'foreign keys' => array(
+      'simple_newsletter_registration_uid' => array('table' => 'users','columns' => array('user' => 'uid')),
+    ),
+  );
+  return $schema;
+}
